@@ -1,11 +1,16 @@
 import axios from 'axios';
 import queryString from 'query-string';
 
-const objectToQueryString = (obj: {}, options = {}) =>
-    queryString.stringify(obj, {
+const objectToQueryString = (obj: {}, options = {}) => {
+    console.log(`Object to QS param: `, obj);
+    const result = queryString.stringify(obj, {
         arrayFormat: 'bracket',
         ...options
     });
+
+    console.log(`Object to QS: `, result);
+    return result;
+};
 
 const defaults = {
     baseURL: process.env.API_URL || 'https://api.scryfall.com',
@@ -15,18 +20,13 @@ const defaults = {
     }),
     error: {
         code: 'INTERNAL_ERROR',
-        message:
-            'Something went wrong. Please check your internet connection or contact our support.',
+        message: 'Something went wrong. Please check your internet connection or contact our support.',
         status: 503,
         data: {}
     }
 };
 
-function dispatch<T>(
-    method: 'GET',
-    url: string,
-    ...variables: any
-): Promise<T> {
+function dispatch<T>(method: 'GET', url: string, variables: any): Promise<T> {
     const a = new Promise<T>((resolve, reject) => {
         axios({
             url: `${defaults.baseURL}${url}`,
@@ -37,9 +37,11 @@ function dispatch<T>(
             paramsSerializer: objectToQueryString
         }).then(
             (response) => {
+                console.info(`Fetched Data for ${url}`, response.data);
                 resolve(response.data);
             },
             (error) => {
+                console.error(`Error Fetching Data for ${url}`, error);
                 if (error.response) {
                     if (error.response.data.error.code === 'INVALID_TOKEN') {
                         // removeStoredAuthToken();
@@ -57,8 +59,8 @@ function dispatch<T>(
     return a;
 }
 
-function get<T>(url: string, ...args: any) {
-    return dispatch<T>('GET', url, ...args);
+function get<T>(url: string, args?: any) {
+    return dispatch<T>('GET', url, args);
 }
 
 const restApi = {
