@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { ScrySet, ScryResponse } from '../models/scryfall';
 import useLoadableQuery from './useLoadableQuery';
 
